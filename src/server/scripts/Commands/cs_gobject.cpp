@@ -590,13 +590,27 @@ public:
         uint32 lootId = 0;
 
         if (!*args)
+            return false;
+
+        // number or Shift-click form |color|Hgameobject:go_id|h[name]|h|r or |color|Hgameobject_entry:entry|h[name]|h|r
+        static char const* const keys[] =
         {
-            if (WorldObject* object = handler->getSelectedObject())
-                entry = object->GetEntry();
-            else
-                entry = atoul((char*)args);
-        } else
-                entry = atoul((char*)args);
+            "Hgameobject_entry",
+            "Hgameobject",
+            nullptr
+        };
+        int keyIndex = 0;
+        char* cValue = handler->extractKeyFromLink((char*)args, keys, &keyIndex);
+        if (!cValue)
+            return false;
+
+        if (keyIndex == 1)
+        {
+            if (const GameObjectData* data = sObjectMgr->GetGOData(atoul(cValue)))
+                entry = data->id;
+        }
+        else
+            entry = atoul(cValue);
 
         GameObjectTemplate const* gameObjectInfo = sObjectMgr->GetGameObjectTemplate(entry);
 
